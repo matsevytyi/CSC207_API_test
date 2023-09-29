@@ -24,7 +24,7 @@ by other users.
 
 **List of any technical problems blocking progress:**
 - While the Mapbox web services provides apis for map data, such as static images and map vector tiles,
-we have yet to decide how we want to embed this data to produce an interactive map in our java code.
+we still are having problems with embedding the map in our java code.
 
 ## API
 
