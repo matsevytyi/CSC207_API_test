@@ -95,12 +95,22 @@ public class apiRoutingFrame extends JFrame implements ActionListener {
             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
                 if (response.isSuccessful()) {
                     DirectionsResponse directionsResponse = response.body();
-                    String jsonResponse = directionsResponse.toJson();
-                    System.out.println(jsonResponse);
+                    if (directionsResponse != null && !directionsResponse.routes().isEmpty()) {
+                        DirectionsRoute route = directionsResponse.routes().get(0);
+                        double totalDistance = route.distance() / 1000.0; // Convert to kilometers
+                        double totalDuration = route.duration() / 60.0; // Convert to minutes
+
+
+                        JOptionPane.showMessageDialog(null, "Duration: " + totalDuration + " minutes\nDistance: " + totalDistance + " km", "Route Information", JOptionPane.INFORMATION_MESSAGE);
+
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No route found", "Route Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
-                    System.err.println("Request failed: " + response.message());
+                    JOptionPane.showMessageDialog(null, "Error in API request: " + response.message(), "API Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
+
 
             @Override
             public void onFailure(Call<DirectionsResponse> call, Throwable t) {
