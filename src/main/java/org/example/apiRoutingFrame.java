@@ -1,5 +1,14 @@
 package org.example;
 
+import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.MapboxDirections;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,7 +24,7 @@ public class apiRoutingFrame extends JFrame implements ActionListener {
     JTextField StartLong = new JTextField();
     JTextField DestLat = new JTextField();
     JTextField DestLong = new JTextField();
-    JButton getRouteButton = new JButton("FIND ROUTE");
+    JButton getRouteButton = new JButton("FIND INFORMATION");
     JButton clearInputButton = new JButton("CLEAR INPUT");
 
 
@@ -63,8 +72,41 @@ public class apiRoutingFrame extends JFrame implements ActionListener {
         clearInputButton.addActionListener(this);
     }
 
-    public void executeAPI(String x1, String y1, String x2, String y2) {
-        //TODO: api code execution
+    public void executeAPI(double x1, double  y1, double  x2, double  y2) {
+
+        String accessToken = "pk.eyJ1IjoibGl6b2trayIsImEiOiJjbG40c3lxOGswMnB2MmtwaGVwbnF2M3RoIn0.ETemsYB1tkNiHfcindemMQ";
+
+        Point origin = Point.fromLngLat(x1, y1);
+        Point destination = Point.fromLngLat(x2, y2);
+
+        MapboxDirections directionsClient = MapboxDirections.builder()
+                .origin(origin)
+                .destination(destination)
+                .accessToken(accessToken)
+                .profile(DirectionsCriteria.PROFILE_DRIVING)
+                .steps(true)
+                .voiceInstructions(true)
+                .geometries(DirectionsCriteria.GEOMETRY_POLYLINE)
+                .build();
+
+        // GET request to the Mapbox Directions API
+        directionsClient.enqueueCall(new Callback<DirectionsResponse>() {
+            @Override
+            public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+                if (response.isSuccessful()) {
+                    DirectionsResponse directionsResponse = response.body();
+                    String jsonResponse = directionsResponse.toJson();
+                    System.out.println(jsonResponse);
+                } else {
+                    System.err.println("Request failed: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                System.err.println("Request failed: " + t.getMessage());
+            }
+        });
     }
 
     @Override
@@ -81,8 +123,11 @@ public class apiRoutingFrame extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(null, "Please fill all the fields", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            executeAPI(startLat, startLong, destLat, destLong);
+            double x1 = Double.parseDouble(startLat);
+            double y1 = Double.parseDouble(startLong);
+            double x2 = Double.parseDouble(destLat);
+            double y2 = Double.parseDouble(destLong);
+            executeAPI(x1, y1, x2, y2);
 
             JOptionPane.showMessageDialog(null, "API code executed", "API code execution", JOptionPane.INFORMATION_MESSAGE);
         }
